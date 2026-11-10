@@ -1,6 +1,6 @@
 ---
 name: jira-refine
-description: Refine a bare-bones Jira user story into the team's full story template (As/I want/So that, User Flow, Example, Technical Details, Important Notes, Acceptance Criteria). Use when the user runs /jira-refine, or asks to "refine a ticket", "flesh out this story", "write acceptance criteria for", "fill in the template for" a Jira issue.
+description: Refine a bare-bones Jira user story into a well-rounded template. Use when the user runs /jira-refine, or asks to "refine a ticket", "flesh out this story", "write acceptance criteria for", "fill in the template for" a Jira issue.
 allowed-tools: mcp__claude_ai_Atlassian__getJiraIssue, mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql, mcp__claude_ai_Atlassian__editJiraIssue, mcp__claude_ai_Atlassian__atlassianUserInfo, mcp__claude_ai_Atlassian__getAccessibleAtlassianResources, ToolSearch, Read, Grep, Glob
 ---
 
@@ -94,7 +94,28 @@ Optionally mine context that is cheaply available and clearly relevant, e.g. the
 epic's summary, or the repo in the current working directory when the ticket names files or
 services. Do not go on an unprompted archaeology expedition across the codebase.
 
-## Step 4: fill the template
+## Step 4a: investigate the repos
+Use the repo-investigator skill to dig deeper into the repos. Think of everything else 
+that you need to know in order to write a proper well-rounded ticket, come up with a well structured
+question/topic for the repo-investigator. 
+
+## Step 4b: grill the user
+Be critical, is there still information missing? Are there still things unclear or vague? Is there
+any ambiguity at all? If there is you MUST MUST MUST get these answers from the user. You may under
+no circumstances make any assumptions. All of the facts you need are either in the ticket, the repos, 
+or can be provided by the user. 
+
+Think of everything else that you need to know in order to write a proper well-rounded ticket. A developer or agent picking
+up this ticket should know exactly what needs to happen and what steps to take to achieve the intended 
+goal of the ticket. 
+
+Use the /grilling skill to dive deeper into the contents of the ticket in order to get the missing
+information from the user. 
+
+The user is allowed to skip this step if they choose. In that case make a list of assumptions/unknowns 
+and include it in the ticket at a logical place. 
+
+## Step 5: fill the template
 
 Use the template in [references/template.md](./references/template.md). 
 
@@ -112,7 +133,7 @@ Drafting rules:
 - Match the ticket's language. If the existing text is Dutch, write Dutch.
 - American English spelling when writing English. No em-dashes.
 
-## Step 5: show the draft
+## Step 6: show the draft
 
 Output the refined description as **plain markdown text in the chat**, in a fenced code
 block so the user can read the raw markup. Do not touch Jira yet.
@@ -124,7 +145,7 @@ Underneath the block, add a short note listing:
 Then invite edits. Iterate on the draft as many times as the user wants. Each new version
 goes back through this step.
 
-## Step 6: ask permission, then write
+## Step 7: ask permission, then write
 
 Only once the user says the draft is good, ask, spelling out the exact target:
 
@@ -170,3 +191,9 @@ suggestion at the end and let the user decide.
 - `/jira-refine I want you to refine the ticket about <...>` — search from the description
 - Anything else in the invocation (e.g. "focus on the acceptance criteria") is extra
   steering to apply on top of the normal flow
+
+
+## Writing Guidelines
+* Keep your answers short, concise, to the point, and clear
+* Do not use uneccessary fluff text, only what is truly needed
+* Do not be vague, be specific and explicit, but NOT wordy
