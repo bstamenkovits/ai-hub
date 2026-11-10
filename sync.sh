@@ -1,14 +1,26 @@
 #!/usr/bin/env bash
-# Symlink agents and skills listed in links.json into ~/.claude/
+# Remove all ~/.claude/ symlinks pointing into this repo, then relink from config.json
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
-CONFIG="$SCRIPT_DIR/links.json"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG="$REPO_DIR/config.json"
 CLAUDE_DIR="$HOME/.claude"
 
 command -v jq >/dev/null || { echo "error: jq is required" >&2; exit 1; }
-[[ -f "$CONFIG" ]] || { echo "error: $CONFIG not found" >&2; exit 1; }
+[[ -f "$CONFIG" ]] || { echo "error: $CONFIG not found (copy config.example.json)" >&2; exit 1; }
+
+mkdir -p "$CLAUDE_DIR/agents" "$CLAUDE_DIR/skills"
+
+# Unlink everything from this repo, including names no longer in config.json
+for dest in "$CLAUDE_DIR"/agents/* "$CLAUDE_DIR"/skills/*; do
+  [[ -L "$dest" ]] || continue
+  case "$(readlink "$dest")" in
+    "$REPO_DIR"/agents/* | "$REPO_DIR"/skills/*)
+      rm "$dest"
+      echo "removed: $dest"
+      ;;
+  esac
+done
 
 # link <source> <target>
 link() {
@@ -28,8 +40,6 @@ link() {
   ln -sfn "$src" "$dest"
   echo "linked:  $dest -> $src"
 }
-
-mkdir -p "$CLAUDE_DIR/agents" "$CLAUDE_DIR/skills"
 
 while IFS= read -r agent; do
   link "$REPO_DIR/agents/$agent.md" "$CLAUDE_DIR/agents/$agent.md"
