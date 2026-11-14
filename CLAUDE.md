@@ -20,8 +20,11 @@ Skills and agents reference each other by name, so syncing one may require synci
 ## Syncing to ~/.claude
 
 ```bash
+bash sync.sh                         # link every agent and skill in the repo
+
 cp config.example.json config.json   # gitignored; list the agent/skill names to link
-bash sync.sh                         # requires jq
+bash sync.sh --config                # link only what config.json lists (requires jq)
+bash sync.sh --config other.json     # or use a different list
 ```
 
-`sync.sh` first removes **every** symlink in `~/.claude/agents/` and `~/.claude/skills/` that points into this repo, then relinks only what `config.json` lists. Agents link as files (`agents/<name>.md`), skills link as whole directories (`skills/<name>`). It never overwrites a real file or directory at the target. Since these are symlinks, edits to files here take effect in Claude Code right away without re-running the script. Re-run it only after adding, removing, or renaming entries.
+`sync.sh` first removes **every** symlink in `~/.claude/agents/` and `~/.claude/skills/` that points into this repo, then relinks either everything (every `agents/*.md` and every `skills/*/` containing a `SKILL.md`) or only what the config lists. Agents link as files (`agents/<name>.md`), skills link as whole directories (`skills/<name>`). It never overwrites a real file or directory at the target. Since these are symlinks, edits to files here take effect in Claude Code right away without re-running the script. Re-run it only after adding, removing, or renaming entries.
