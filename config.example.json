@@ -1,4 +1,5 @@
 {
+    "claude.md": "CLAUDE.md",
     "agents": [
         "python-test-writer"
     ],

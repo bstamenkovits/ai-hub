@@ -2,6 +2,7 @@
 # Remove all ~/.claude/ symlinks pointing into this repo, then relink.
 # Usage: sync.sh                    link every agent and skill
 #        sync.sh --config [file]    link only what config.json (or file) lists
+# ~/.claude/CLAUDE.md links to claude/CLAUDE.md, or claude/<name> if config sets "claude.md": "<name>".
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -96,6 +97,15 @@ while IFS= read -r agent; do
 done < <(list_agents)
 (( agent_count > 0 )) && echo
 
+skill_count=0
 while IFS= read -r skill; do
   link "$REPO_DIR/skills/$skill" "$CLAUDE_DIR/skills/$skill"
+  skill_count=$((skill_count + 1))
 done < <(list_skills)
+(( skill_count > 0 )) && echo
+
+claude_md=CLAUDE.md
+if [[ $MODE == config ]]; then
+  claude_md="$(jq -r '."claude.md" // "CLAUDE.md"' "$CONFIG")"
+fi
+link "$REPO_DIR/claude/$claude_md" "$CLAUDE_DIR/CLAUDE.md"
