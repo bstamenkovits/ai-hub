@@ -8,7 +8,9 @@ allowed-tools: mcp__claude_ai_Atlassian__getJiraIssue, mcp__claude_ai_Atlassian_
 
 Runs from the root of the repo the feature will be built in. Reads the ticket, tears it apart
 looking for gaps, interviews the user until nothing is ambiguous, then produces an
-implementation plan. The only file it writes is the plan itself: no code edits, no Jira writes.
+implementation plan, has a fresh `plan-reviewer` agent review it, and revises the plan based on
+the review. The only files it writes are the plan and its review report: no code edits, no Jira
+writes.
 
 ## Site constants (marktlink.atlassian.net)
 
@@ -25,8 +27,8 @@ If `cloudId` fails, re-resolve it with `getAccessibleAtlassianResources`.
 explicit answer from the user. If there is even a hint of ambiguity, ask. A plan with an open
 question is fine; a plan built on a guess is not.
 
-Also: never write to Jira and never edit code. This skill only plans. The plan file is the
-only thing it writes.
+Also: never write to Jira and never edit code. This skill only plans. The plan file and the
+review report are the only things it writes.
 
 ## Step 1: identify the ticket
 
@@ -123,7 +125,7 @@ the plan under **Open questions**, verbatim, never resolved by a guess.
 
 Save the plan to `plan-<KEY>.md` (e.g. `plan-MLNEX-706.md`) in the repo root, the directory
 the skill was invoked from. If that file already exists, show the user and ask before
-overwriting. Then post the path and a short summary in chat. Structure:
+overwriting. Do not show the plan to the user yet; it goes to review first. Structure:
 
 ```
 # Plan: <KEY>: <summary>
@@ -157,6 +159,53 @@ Rules:
 - Steps are small and ordered so each one can be verified on its own.
 - Follow the conventions the repo already uses. Do not introduce new patterns or
   dependencies unless the user agreed to it in the grilling.
+
+## Step 8: review the plan
+
+Spawn a fresh `plan-reviewer` agent. Fresh means a new agent, never a continued one, so it has
+none of this conversation's assumptions. Give it only:
+
+- the path to `plan-<KEY>.md`, and an instruction to read it
+- the ticket key, summary, and description, so it can check requirements coverage
+- the repo root to verify the plan against
+
+Do not pass your reasoning, the grilling, or your opinion of the plan. The plan must stand on
+its own.
+
+Save the report it returns, verbatim, to `plan-<KEY>-review.md` next to the plan (overwrite a
+previous one without asking; it belongs to this run).
+
+## Step 9: revise the plan from the review
+
+Go over the report issue by issue, in its **Hand-off Instructions** order. For each issue,
+verify it against the repo before acting on it: the reviewer can be wrong too. Then:
+
+- **HIGH**: fix it. If the fix needs a decision the ticket, repo, or grilling did not settle,
+  ask the user (one question per message, same rules as Step 6). Never resolve it by guessing.
+- **MID**: fix it, unless it is wrong or conflicts with a decision the user made. Then skip it
+  and record why.
+- **LOW**: apply if it is cheap and clearly better; otherwise skip.
+- **Unverified Assumptions**: check each against the repo. Unresolvable ones go under
+  **Open questions** in the plan.
+
+A fix must never override a decision the user confirmed in Step 6. If the reviewer disagrees
+with one, show the user both sides and let them decide.
+
+Write the revised plan back to `plan-<KEY>.md`. Then post in chat:
+
+```
+Plan: plan-<KEY>.md
+Review: plan-<KEY>-review.md (<verdict>, <n> HIGH, <n> MID, <n> LOW)
+
+Applied: H1, M1, M3, L2
+Skipped: M2 (<reason>), L1 (<reason>)
+Asked you: H2
+
+<short plan summary>
+```
+
+If the verdict was REVISE or REJECT, ask the user whether to run another review round on the
+revised plan. Each round repeats Steps 8 and 9 with a new fresh agent.
 
 Iterate on the plan as long as the user wants. Every revision is written back to the same
 `plan-<KEY>.md`.

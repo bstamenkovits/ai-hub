@@ -14,6 +14,7 @@ A version-controlled home for personal Claude Code **agents** and **skills**. Th
 
 Skills and agents reference each other by name, so syncing one may require syncing its dependencies too:
 - `jira-refine` uses the `repo-investigator` agent and the `grilling` skill.
+- `jira-plan` uses the `repo-investigator` and `plan-reviewer` agents and the `grilling` skill.
 - `repo-investigator` can spawn copies of itself (`Agent(repo-investigator)` in its tools) to fan out.
 - `python-test-writer` (agent) and `test-python` (skill) cover the same pytest conventions.
 
