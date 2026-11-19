@@ -1,6 +1,6 @@
 ---
-name: plan-feature
-description: Plan the implementation of a feature from a Jira ticket. Use when the user runs /plan-feature with a Jira link or issue key, or asks to "plan this ticket", "plan the implementation of", "how should we build" a Jira issue.
+name: jira-plan
+description: Plan the implementation of a feature from a Jira ticket. Use when the user runs /jira-plan with a Jira link or issue key, or asks to "plan this ticket", "plan the implementation of", "how should we build" a Jira issue.
 allowed-tools: mcp__claude_ai_Atlassian__getJiraIssue, mcp__claude_ai_Atlassian__searchJiraIssuesUsingJql, mcp__claude_ai_Atlassian__atlassianUserInfo, mcp__claude_ai_Atlassian__getAccessibleAtlassianResources, ToolSearch, Skill, Agent, Read, Grep, Glob, Write
 ---
 
@@ -30,7 +30,7 @@ only thing it writes.
 
 ## Step 1: identify the ticket
 
-Parse what came after `/plan-feature`:
+Parse what came after `/jira-plan`:
 
 - **A Jira link**: extract the key from `/browse/<KEY>` or from a `selectedIssue=<KEY>` query
   parameter.
@@ -163,9 +163,9 @@ Iterate on the plan as long as the user wants. Every revision is written back to
 
 ## Arguments
 
-- `/plan-feature MLNEX-706`: plan that key
-- `/plan-feature https://marktlink.atlassian.net/browse/MLNEX-706`: plan the linked ticket
-- `/plan-feature`: ask for the key or link
+- `/jira-plan MLNEX-706`: plan that key
+- `/jira-plan https://marktlink.atlassian.net/browse/MLNEX-706`: plan the linked ticket
+- `/jira-plan`: ask for the key or link
 - Anything else in the invocation is extra steering applied on top of the normal flow
 
 ## Writing Guidelines
